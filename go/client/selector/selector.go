@@ -3,7 +3,9 @@ package selector
 import (
 	"errors"
 	"hash/crc32"
+	"net"
 	"sync"
+	"time"
 )
 
 // All is a Selector that returns all servers
@@ -24,7 +26,13 @@ func (sa *All) Get(topic string) ([]string, error) {
 		sa.RUnlock()
 		return nil, errors.New("no servers")
 	}
-	servers := sa.servers
+	var isLiveServers []string
+	for _, server := range sa.servers {
+		if sa.judgeLive(server) {
+			isLiveServers = append(isLiveServers, server)
+		}
+	}
+	servers := isLiveServers
 	sa.RUnlock()
 	return servers, nil
 }
@@ -34,6 +42,17 @@ func (sa *All) Set(servers ...string) error {
 	sa.servers = servers
 	sa.Unlock()
 	return nil
+}
+
+func (sa *All) judgeLive(server string) bool {
+	conn, err := net.DialTimeout("tcp", server, 3*time.Second)
+	if err != nil {
+		return false
+	}
+	if conn != nil {
+		return true
+	}
+	return false
 }
 
 func (ss *Shard) Get(topic string) ([]string, error) {
