@@ -6,7 +6,7 @@ import (
 
 func TestSelectAll(t *testing.T) {
 	// testServers := []string{"a", "b", "c"}
-	testServers := []string{"10.224.118.201:8081", "10.224.208.46:8081", "10.224.208.70:8081"}
+	testServers := []string{"https://localhost:8081", "https://localhost:8081", "https://localhost:8081"}
 	sa := new(All)
 	if err := sa.Set(testServers...); err != nil {
 		t.Fatal(err)

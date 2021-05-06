@@ -4,6 +4,7 @@ import (
 	"errors"
 	"hash/crc32"
 	"net"
+	"strings"
 	"sync"
 	"time"
 )
@@ -28,7 +29,7 @@ func (sa *All) Get(topic string) ([]string, error) {
 	}
 	var isLiveServers []string
 	for _, server := range sa.servers {
-		if sa.judgeLive(server) {
+		if sa.judgeLive(strings.Split(server, "//")[1]) {
 			isLiveServers = append(isLiveServers, server)
 		}
 	}
