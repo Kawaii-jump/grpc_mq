@@ -29,8 +29,14 @@ func (sa *All) Get(topic string) ([]string, error) {
 	}
 	var isLiveServers []string
 	for _, server := range sa.servers {
-		if sa.judgeLive(strings.Split(server, "//")[1]) {
-			isLiveServers = append(isLiveServers, server)
+		if strings.Contains(server, "//") {
+			if sa.judgeLive(strings.Split(server, "//")[1]) {
+				isLiveServers = append(isLiveServers, server)
+			}
+		} else {
+			if sa.judgeLive(server) {
+				isLiveServers = append(isLiveServers, server)
+			}
 		}
 	}
 	servers := isLiveServers

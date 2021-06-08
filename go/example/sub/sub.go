@@ -1,27 +1,51 @@
 package main
 
 import (
-	"flag"
-	"log"
-	"strings"
+	"fmt"
 
 	"github.com/Kawaii-jump/grpc_mq/go/client"
-)
-
-var (
-	servers = flag.String("servers", "localhost:8081", "Comma separated list of MQ servers")
+	"github.com/Kawaii-jump/grpc_mq/go/client/grpc"
 )
 
 func main() {
-	flag.Parse()
+	GrpcSub()
+}
 
-	c := client.New(
-		client.WithServers(strings.Split(*servers, ",")...),
+func GrpcSub() {
+	c := grpc.New(
+		client.WithServers("http://10.224.205.72:8081"),
 	)
 
-	ch, err := c.Subscribe("foo")
+	topic := "grpc"
+	ch, err := c.Subscribe(topic)
 	if err != nil {
-		log.Println(err)
+		fmt.Printf("err:%v", err)
+		return
+	}
+
+	defer c.Unsubscribe(ch)
+
+	i := 1
+	for {
+		select {
+		case e := <-ch:
+			fmt.Printf("sub topic:%s,\tnumber:%d,\tmessage:%s\n", topic, i, e)
+			i++
+		}
+	}
+
+}
+
+func HttpSub() {
+	c := client.New(
+		client.WithServers("http://10.224.205.72:8081"),
+	)
+
+	topic := "http"
+
+	ch, err := c.Subscribe(topic)
+	if err != nil {
+		fmt.Printf("err:%v", err)
 		return
 	}
 	defer c.Unsubscribe(ch)
@@ -29,7 +53,7 @@ func main() {
 	for {
 		select {
 		case e := <-ch:
-			log.Println(string(e))
+			fmt.Printf("sub topic:%s,\tmessage:%s\n", topic, e)
 		}
 	}
 }

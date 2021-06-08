@@ -1,8 +1,9 @@
-package client
+package grpc
 
 import (
 	"crypto/tls"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -40,6 +41,10 @@ func grpcPublish(addr, topic string, payload []byte) error {
 
 	dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 
+	if strings.Contains(addr, "http") {
+		addr = strings.Split(addr, "//")[1]
+	}
+
 	conn, err := grpc.Dial(addr, dialOpts...)
 	if err != nil {
 		return err
@@ -63,6 +68,10 @@ func grpcSubscribe(addr string, s *subscriber) error {
 	})
 
 	dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
+
+	if strings.Contains(addr, "http") {
+		addr = strings.Split(addr, "//")[1]
+	}
 
 	conn, err := grpc.Dial(addr, dialOpts...)
 	if err != nil {
